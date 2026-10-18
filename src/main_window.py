@@ -1,7 +1,8 @@
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QLabel, QMainWindow, QTabWidget
+from timer_tab import TimerTab 
 
-TABS = ["Timer", "Screenshots", "Files", "Notes", "Clipboard"]
+TABS = ["Screenshots", "Files", "Notes", "Clipboard"]
 
 def placeholder(name):
     label = QLabel(f"{name}\n\nComing soon")
@@ -16,6 +17,8 @@ class MainWindow(QMainWindow):
         self.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint, True)
 
         tabs = QTabWidget()
+        self.timer_tab = TimerTab()
+        tabs.addTab(self.timer_tab, "Timer")
         for name in TABS:
             tabs.addTab(placeholder(name), name)
         self.setCentralWidget(tabs)
