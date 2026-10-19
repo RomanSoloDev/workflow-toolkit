@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import (
@@ -10,6 +12,8 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from idle import IdleMonitor
+from idle_dialog import IdleDialog
 from time_tracker import HEARTBEAT_SECONDS, TimeTracker
 
 def format_seconds(seconds):
@@ -17,7 +21,6 @@ def format_seconds(seconds):
     hours, rest = divmod(seconds, 3600)
     minutes, secs = divmod(rest, 60)
     return f"{hours:02}:{minutes:02}:{secs:02}"
-
 
 class TimerTab(QWidget):
     def __init__(self):
@@ -66,8 +69,10 @@ class TimerTab(QWidget):
         self.heartbeat_timer.timeout.connect(self.tracker.heartbeat)
         self.heartbeat_timer.start(HEARTBEAT_SECONDS * 1000)
 
-        # Quitting from the tray pauses the timer so time isn't over-counted
         QApplication.instance().aboutToQuit.connect(self.tracker.pause)
+
+        self.idle_monitor = IdleMonitor(self.tracker, self)
+        self.idle_monitor.user_returned.connect(self.on_user_returned)
 
         self.refresh()
         if self.tracker.recovered:
@@ -95,6 +100,13 @@ class TimerTab(QWidget):
             self.tracker.stop()
             self.refresh()
 
+    def on_user_returned(self, idle_id):
+        started_at, ended_at = self.tracker.get_idle_period(idle_id)
+        dialog = IdleDialog(started_at, ended_at)
+        if dialog.exec():
+            self.tracker.resolve_idle(idle_id, dialog.kept)
+        self.refresh()
+
     def refresh(self):
         tracker = self.tracker
         self.time_label.setText(format_seconds(tracker.elapsed()))
@@ -104,7 +116,13 @@ class TimerTab(QWidget):
             self.status_label.setText("Stopped")
         else:
             self.session_label.setText(f"Session {tracker.session_id}")
-            self.status_label.setText("Running" if tracker.is_running else "Paused")
+            if tracker.is_idle:
+                since = datetime.fromtimestamp(tracker.idle_start).strftime("%H:%M")
+                self.status_label.setText(f"Running (away since {since})")
+            elif tracker.is_running:
+                self.status_label.setText("Running")
+            else:
+                self.status_label.setText("Paused")
 
         self.start_button.setEnabled(tracker.session_id is None)
         self.pause_button.setEnabled(tracker.session_id is not None)
