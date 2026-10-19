@@ -17,11 +17,18 @@ CREATE TABLE IF NOT EXISTS segments (
     ended_at REAL,
     last_seen REAL
 );
+
+CREATE TABLE IF NOT EXISTS idle_periods (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    session_id INTEGER NOT NULL REFERENCES sessions(id),
+    started_at REAL NOT NULL,
+    ended_at REAL,
+    kept_seconds REAL
+);
 """
 
-
 def connect():
-    #saves every change immediately, so nothing is lost in a crash
+    # saves every change immediately, so nothing is lost in a crash
     conn = sqlite3.connect(DB_PATH, isolation_level=None)
     conn.executescript(SCHEMA)
     return conn
