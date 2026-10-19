@@ -89,16 +89,16 @@ def export_csv(conn, path):
         for s in sessions:
             start = datetime.fromtimestamp(s.started_at)
             if s.ended_at:
-                end = datetime.fromtimestamp(s.ended_at).strftime("%H:%M:%S")
+                end = datetime.fromtimestamp(s.ended_at).strftime("%Y-%m-%d %H:%M:%S")
             else:
                 end = "running"
             writer.writerow([
                 s.number,
                 start.strftime("%Y-%m-%d"),
-                start.strftime("%H:%M:%S"),
+                start.strftime("%Y-%m-%d %H:%M:%S"),
                 end,
                 format_hms(s.worked),
-                round(s.worked, 1),
-                round(s.removed, 1),
+                round(s.worked, 2),
+                round(s.removed, 2),
                 s.undecided,
             ])

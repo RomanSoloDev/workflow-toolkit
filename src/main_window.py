@@ -1,6 +1,7 @@
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QLabel, QMainWindow, QTabWidget
-from timer_tab import TimerTab 
+from timer_tab import TimerTab
+from history_tab import HistoryTab
 
 TABS = ["Screenshots", "Files", "Notes", "Clipboard"]
 
@@ -13,12 +14,16 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Workflow Toolkit")
-        self.resize(380, 520)
+        self.resize(460, 520)
         self.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint, True)
 
         tabs = QTabWidget()
         self.timer_tab = TimerTab()
         tabs.addTab(self.timer_tab, "Timer")
+
+        self.history_tab = HistoryTab(self.timer_tab.tracker)
+        tabs.addTab(self.history_tab, "History")
+
         for name in TABS:
             tabs.addTab(placeholder(name), name)
         self.setCentralWidget(tabs)
