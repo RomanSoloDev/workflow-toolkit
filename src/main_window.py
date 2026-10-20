@@ -1,10 +1,12 @@
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QLabel, QMainWindow, QTabWidget
+
 from timer_tab import TimerTab
 from history_tab import HistoryTab
 from screenshots_tab import ScreenshotsTab
+from files_tab import FilesTab
 
-TABS = ["Files", "Notes", "Clipboard"]
+TABS = ["Notes", "Clipboard"]
 
 def placeholder(name):
     label = QLabel(f"{name}\n\nComing soon")
@@ -27,6 +29,9 @@ class MainWindow(QMainWindow):
 
         self.screenshots_tab = ScreenshotsTab(self.timer_tab.tracker)
         tabs.addTab(self.screenshots_tab, "Screenshots")
+
+        self.files_tab = FilesTab()
+        tabs.addTab(self.files_tab, "Files")
 
         for name in TABS:
             tabs.addTab(placeholder(name), name)
