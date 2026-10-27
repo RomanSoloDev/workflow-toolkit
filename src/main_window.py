@@ -5,8 +5,9 @@ from timer_tab import TimerTab
 from history_tab import HistoryTab
 from screenshots_tab import ScreenshotsTab
 from files_tab import FilesTab
+from notes_tab import NotesTab
 
-TABS = ["Notes", "Clipboard"]
+TABS = ["Clipboard"]
 
 def placeholder(name):
     label = QLabel(f"{name}\n\nComing soon")
@@ -32,6 +33,9 @@ class MainWindow(QMainWindow):
 
         self.files_tab = FilesTab()
         tabs.addTab(self.files_tab, "Files")
+
+        self.notes_tab = NotesTab(self.timer_tab.tracker)
+        tabs.addTab(self.notes_tab, "Notes")
 
         for name in TABS:
             tabs.addTab(placeholder(name), name)

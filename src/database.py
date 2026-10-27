@@ -1,4 +1,4 @@
-"""Local SQLite database for time tracking. Lives in AppData."""
+"""Local SQLite database for time tracking and notes. Lives in AppData."""
 import sqlite3
 
 from paths import DB_PATH
@@ -25,10 +25,18 @@ CREATE TABLE IF NOT EXISTS idle_periods (
     ended_at REAL,
     kept_seconds REAL
 );
+
+CREATE TABLE IF NOT EXISTS notes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    session_id INTEGER REFERENCES sessions(id),
+    title TEXT NOT NULL,
+    body TEXT NOT NULL,
+    updated_at REAL NOT NULL
+);
 """
 
 def connect():
-    # saves every change immediately, so nothing is lost in a crash
+    # Saves every change immediately, so nothing is lost in a crash
     conn = sqlite3.connect(DB_PATH, isolation_level=None)
     conn.executescript(SCHEMA)
     return conn
