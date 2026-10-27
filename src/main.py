@@ -2,6 +2,7 @@ import sys
 
 from PySide6.QtWidgets import QApplication
 
+from dock import DockController
 from hotkeys import MOD_ALT, MOD_CONTROL, HotkeyManager
 from main_window import MainWindow
 from paths import ensure_data_dirs
@@ -17,7 +18,8 @@ def main():
     ensure_data_dirs()
 
     window = MainWindow()
-    tray = TrayIcon(window)
+    dock = DockController(window, window.timer_tab.tracker)
+    tray = TrayIcon(window, dock)
     tray.show()
 
     hotkeys = HotkeyManager(app)
@@ -30,12 +32,12 @@ def main():
         tray.showMessage("Workflow Toolkit", "A screenshot shortcut is already in use by another app.")
     app.aboutToQuit.connect(hotkeys.unregister_all)
 
-    # When started automatically at login, stay quietly in the tray
-    if "--tray" not in sys.argv:
+    if get_setting("docked_mode", False):
+        dock.set_enabled(True)
+    elif "--tray" not in sys.argv:
         window.show()
 
     sys.exit(app.exec())
-
 
 if __name__ == "__main__":
     main()
