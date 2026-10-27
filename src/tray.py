@@ -1,16 +1,15 @@
 from PySide6.QtGui import QAction
 from PySide6.QtWidgets import QApplication, QMenu, QStyle, QSystemTrayIcon
 
-class TrayIcon(QSystemTrayIcon):
-    """Icon by the clock that keeps the app running in the background."""
+from settings import get_setting
 
-    def __init__(self, main_window):
+class TrayIcon(QSystemTrayIcon):
+    def __init__(self, main_window, dock):
         icon = QApplication.style().standardIcon(QStyle.StandardPixmap.SP_ComputerIcon)
         super().__init__(icon)
         self.main_window = main_window
         self.setToolTip("Workflow Toolkit")
 
-        # Reference
         self.menu = QMenu()
 
         show_action = QAction("Show / Hide", self.menu)
@@ -22,6 +21,12 @@ class TrayIcon(QSystemTrayIcon):
         on_top_action.setChecked(True)
         on_top_action.toggled.connect(main_window.set_always_on_top)
         self.menu.addAction(on_top_action)
+
+        dock_action = QAction("Docked mode", self.menu)
+        dock_action.setCheckable(True)
+        dock_action.setChecked(get_setting("docked_mode", False))
+        dock_action.toggled.connect(dock.set_enabled)
+        self.menu.addAction(dock_action)
 
         self.menu.addSeparator()
 
