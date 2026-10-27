@@ -1,18 +1,12 @@
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QLabel, QMainWindow, QTabWidget
+from PySide6.QtWidgets import QMainWindow, QTabWidget
 
 from timer_tab import TimerTab
 from history_tab import HistoryTab
 from screenshots_tab import ScreenshotsTab
 from files_tab import FilesTab
 from notes_tab import NotesTab
-
-TABS = ["Clipboard"]
-
-def placeholder(name):
-    label = QLabel(f"{name}\n\nComing soon")
-    label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-    return label
+from clipboard_tab import ClipboardTab
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -37,8 +31,9 @@ class MainWindow(QMainWindow):
         self.notes_tab = NotesTab(self.timer_tab.tracker)
         tabs.addTab(self.notes_tab, "Notes")
 
-        for name in TABS:
-            tabs.addTab(placeholder(name), name)
+        self.clipboard_tab = ClipboardTab()
+        tabs.addTab(self.clipboard_tab, "Clipboard")
+
         self.setCentralWidget(tabs)
 
     def set_always_on_top(self, enabled):
