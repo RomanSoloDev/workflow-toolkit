@@ -7,12 +7,14 @@ from screenshots_tab import ScreenshotsTab
 from files_tab import FilesTab
 from notes_tab import NotesTab
 from clipboard_tab import ClipboardTab
+from settings_tab import SettingsTab
+
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Workflow Toolkit")
-        self.resize(460, 520)
+        self.resize(520, 540)
         self.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint, True)
 
         tabs = QTabWidget()
@@ -33,6 +35,9 @@ class MainWindow(QMainWindow):
 
         self.clipboard_tab = ClipboardTab()
         tabs.addTab(self.clipboard_tab, "Clipboard")
+
+        self.settings_tab = SettingsTab(self.timer_tab.idle_monitor)
+        tabs.addTab(self.settings_tab, "Settings")
 
         self.setCentralWidget(tabs)
 

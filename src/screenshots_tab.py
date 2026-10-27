@@ -22,9 +22,9 @@ from screenshot_capture import (
     screen_under_cursor,
     session_folder,
 )
+from settings import get_setting
 
 HIDE_DELAY_MS = 250
-SHORTCUTS_TEXT = "Shortcuts: Ctrl+Alt+F full screen, Ctrl+Alt+R region"
 
 class ScreenshotList(QListWidget):
     def __init__(self):
@@ -82,9 +82,13 @@ class ScreenshotsTab(QWidget):
         self.folder_label = QLabel()
         self.screenshot_list = ScreenshotList()
 
+        full_key = get_setting("full_screen_key", "F")
+        region_key = get_setting("region_key", "R")
+        shortcuts_text = f"Shortcuts: Ctrl+Alt+{full_key} full screen, Ctrl+Alt+{region_key} region"
+
         layout = QVBoxLayout(self)
         layout.addLayout(buttons)
-        layout.addWidget(QLabel(SHORTCUTS_TEXT))
+        layout.addWidget(QLabel(shortcuts_text))
         layout.addWidget(self.folder_label)
         layout.addWidget(self.screenshot_list)
         layout.addWidget(QLabel("Drag a screenshot out to upload it. Double-click to open."))
@@ -102,6 +106,7 @@ class ScreenshotsTab(QWidget):
         self.screenshot_list.load(folder)
 
     def capture(self, region):
+        # Ignore a second press while a region is still being picked
         if self.selector is not None and self.selector.isVisible():
             return
         window = self.window()

@@ -1,14 +1,20 @@
-"""Detects when the user has stopped using the mouse and keyboard."""
+"""Detects when the user has stopped using the mouse and keyboard.
 
+Windows records the time of the last input. While the timer runs, we check it
+every second. After the idle threshold (5 minutes)
+"""
 import ctypes
 import time
 from ctypes import wintypes
 
 from PySide6.QtCore import QObject, QTimer, Signal
 
-IDLE_THRESHOLD_SECONDS = 60 * 5
+from settings import get_setting
+
+DEFAULT_IDLE_MINUTES = 5
 CHECK_EVERY_MS = 1000
 SLEEP_GAP_SECONDS = 60
+
 class LASTINPUTINFO(ctypes.Structure):
     _fields_ = [("cbSize", wintypes.UINT), ("dwTime", wintypes.DWORD)]
 
@@ -16,13 +22,12 @@ _user32 = ctypes.windll.user32
 _kernel32 = ctypes.windll.kernel32
 _kernel32.GetTickCount.restype = wintypes.DWORD
 
-
 def read_last_input():
-    """Returns (seconds since last input, Windows' tick count at that input)."""
     info = LASTINPUTINFO()
     info.cbSize = ctypes.sizeof(info)
     if not _user32.GetLastInputInfo(ctypes.byref(info)):
         return 0.0, None
+    # & 0xFFFFFFFF handles the tick counter wrapping round every 49.7 days
     millis = (_kernel32.GetTickCount() - info.dwTime) & 0xFFFFFFFF
     return millis / 1000.0, info.dwTime
 
@@ -32,6 +37,7 @@ class IdleMonitor(QObject):
     def __init__(self, tracker, parent=None):
         super().__init__(parent)
         self.tracker = tracker
+        self.threshold_seconds = get_setting("idle_minutes", DEFAULT_IDLE_MINUTES) * 60
         self.last_check = time.time()
         self.idle_input_tick = None
         self.timer = QTimer(self)
@@ -58,6 +64,7 @@ class IdleMonitor(QObject):
         if gap > SLEEP_GAP_SECONDS:
             asleep_from = now - gap
             if last_input_at > asleep_from:
+                # Someone used the PC to wake it, so they're already back
                 idle_id = self.tracker.add_gap(asleep_from, last_input_at)
                 if idle_id is not None:
                     self.user_returned.emit(idle_id)
@@ -65,7 +72,7 @@ class IdleMonitor(QObject):
                 self.start_idle(last_input_at, input_tick)
             return
 
-        if idle_for >= IDLE_THRESHOLD_SECONDS:
+        if idle_for >= self.threshold_seconds:
             self.start_idle(last_input_at, input_tick)
 
     def start_idle(self, started_at, input_tick):
