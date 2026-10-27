@@ -5,7 +5,9 @@ from settings import get_setting
 
 class TrayIcon(QSystemTrayIcon):
     def __init__(self, main_window, dock):
-        icon = QApplication.style().standardIcon(QStyle.StandardPixmap.SP_ComputerIcon)
+        icon = QApplication.windowIcon()
+        if icon.isNull():
+            icon = QApplication.style().standardIcon(QStyle.StandardPixmap.SP_ComputerIcon)
         super().__init__(icon)
         self.main_window = main_window
         self.setToolTip("Workflow Toolkit")

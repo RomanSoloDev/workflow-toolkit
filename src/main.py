@@ -1,18 +1,19 @@
 import sys
 
+from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QApplication
 
 from dock import DockController
 from hotkeys import MOD_ALT, MOD_CONTROL, HotkeyManager
 from main_window import MainWindow
-from paths import ensure_data_dirs
+from paths import ICON_PATH, ensure_data_dirs
 from settings import get_setting
 from tray import TrayIcon
 
 def main():
     app = QApplication(sys.argv)
     app.setApplicationName("Workflow Toolkit")
-    # Keep running in the tray when the window is hidden
+    app.setWindowIcon(QIcon(str(ICON_PATH)))
     app.setQuitOnLastWindowClosed(False)
 
     ensure_data_dirs()
@@ -38,6 +39,7 @@ def main():
         window.show()
 
     sys.exit(app.exec())
+
 
 if __name__ == "__main__":
     main()
